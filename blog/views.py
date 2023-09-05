@@ -44,5 +44,5 @@ class BlogViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        sned_email = {'subject': "Hello", 'body': "yogesh", "recipients": instance.author.email}
-        trigger_email(sned_email)
+        send_email = {'subject': "Welcome", 'body': "This is my first blog", "recipients": instance.author.email}
+        trigger_email(send_email)
