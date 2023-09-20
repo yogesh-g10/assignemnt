@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'blog',
+    'django_q'
 
 ]
 
@@ -65,7 +66,7 @@ ROOT_URLCONF = 'Assignment1.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -162,5 +163,20 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'kiratwadyogesh@gmail.com'
-EMAIL_HOST_PASSWORD = 'ilwfpenjgubbpmht'
+EMAIL_HOST_PASSWORD = 'rpfg ldrr jcpt djay'
 
+Q_CLUSTER = {
+    'name': 'Assignment1',
+    'workers': 2,
+    'recycle': 500,
+    'timeout': 500,
+    'compress': True,
+    'save_limit': 250,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    'retry': 501,
+    'redis': {
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0, }
+}

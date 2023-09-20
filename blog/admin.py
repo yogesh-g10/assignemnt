@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from blog.models import AppUser, Blog
+from blog.models import AppUser, Event, Employee
 
 
 # Register your models here.
@@ -23,6 +23,10 @@ class UserAdminChild(UserAdmin):
     date_hierarchy = 'date_joined'
     ordering = ['-id']
 
-@admin.register(Blog)
-class BlogAdmin(admin.ModelAdmin):
-    list_display = ['id', 'author', 'title']
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'event_type', 'date']
+
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'event']

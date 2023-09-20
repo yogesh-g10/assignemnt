@@ -1,7 +1,10 @@
 import json
 
 from django.contrib.auth.models import AnonymousUser
+from django.core.mail import EmailMessage
 from django.shortcuts import render
+from django.template.loader import render_to_string
+from django_q.models import Schedule
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed
@@ -11,8 +14,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.renderers import BrowsableAPIRenderer, BaseRenderer
 
 from blog.email import trigger_email
-from blog.models import Blog, AppUser
-from blog.serializers import BolgSerializer, LoginSerializer, UserSerializer
+from blog.models import AppUser, Event, Employee
+from blog.serializers import LoginSerializer, UserSerializer, EventSerializer
 
 
 # Create your views here.
@@ -32,17 +35,29 @@ class UserViewSet(viewsets.ModelViewSet):
                 'user': UserSerializer(user, context={"request": request}).data}
         return Response(data, status=status.HTTP_200_OK, headers=headers)
 
-
-class BlogViewSet(viewsets.ModelViewSet):
-    queryset = Blog.objects.all()
-    serializer_class = BolgSerializer
-    permission_classes = (IsAuthenticated,)
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
 
     def get_queryset(self):
         user = self.request.user
-        return self.queryset.filter(author=user)
+        if user.is_superuser:
+            return self.queryset
+        return []
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        sned_email = {'subject': "Hello", 'body': "yogesh", "recipients": instance.author.email}
-        trigger_email(sned_email)
+    @action(detail=False, methods=['POST'])
+    def send_mail(self, serializer):
+        queryset = Event.objects.all()
+
+        for instance in queryset:
+            execution_time = instance.date
+            instance_type = instance.event_type
+            sc_instance = Schedule.objects.create(func='blog.task.send_email',
+                                                  # args=instance.id,
+                                                  kwargs={'event_type': instance_type, "instance_id": instance.id},
+                                                  schedule_type='O',
+                                                  next_run=execution_time,
+                                                  repeats=1,
+                                                  )
+            print(sc_instance.id)
+        return Response({'message': 'All mails have been scheduled'}, status=200)
