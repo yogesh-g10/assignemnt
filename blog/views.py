@@ -61,3 +61,4 @@ class EventViewSet(viewsets.ModelViewSet):
                                                   )
             print(sc_instance.id)
         return Response({'message': 'All mails have been scheduled'}, status=200)
+
